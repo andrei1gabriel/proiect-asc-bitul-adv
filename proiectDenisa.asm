@@ -177,7 +177,7 @@ eroare_hex:
 
 
 ; ============================
-; PASUL 4 – CALCUL C SI AFISARE
+;  CALCUL C SI AFISARE
 ; ============================
 pasul_4:
     mov C, 0                 
@@ -260,7 +260,7 @@ pc_print:
 
 
 ; ============================
-; PASUL 5 – SORTARE SI AFISARE
+; SORTARE SI AFISARE
 ; ============================
     cmp lungime, 2
     jb pasul_5_afisare       ; Daca < 2 elem, nu sortam, doar afisam
