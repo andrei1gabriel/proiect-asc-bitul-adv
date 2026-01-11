@@ -21,7 +21,7 @@ data segment
     lungime     db 0         ; Numarul real de octeti din sir
     C           dw 0         ; Variabila pentru rezultatul pasului 4
 	
-	; --- Mesaje si Variabile noi pentru Pasii 6 si 7 ---
+	; --- Mesaje si Variabile noi pentru nr_max_octeti 1 si pentru a afisa sirul nou ---
     msg_step6   db 13,10,'6. Max biti 1 (Valoare HEX / Pozitie / NrBiti): $'
     msg_none    db ' Nu exista octet cu minim 3 biti de 1.$'
     msg_step7   db 13,10,'7. Sir rotit (N=suma primi 2 biti) BIN -> HEX:',13,10,'$'
@@ -189,7 +189,7 @@ eroare_hex:
 
 
 ; ============================
-; PASUL 4 – CALCUL C SI AFISARE
+;  CALCUL C SI AFISARE
 ; ============================
 pasul_4:
     mov C, 0                 
@@ -272,7 +272,7 @@ pc_print:
 
 
 ; ============================
-; PASUL 5 – SORTARE SI AFISARE
+; SORTARE SI AFISARE
 ; ============================
     cmp lungime, 2
     jb pasul_5_afisare       ; Daca < 2 elem, nu sortam, doar afisam
@@ -347,7 +347,7 @@ ps_p2:
     inc si
     loop print_sir_loop
 ; ============================
-; PASUL 6 – MAX BITI DE 1 (CORECTAT)
+;  MAX BITI DE 1
 ; ============================
     mov ah, 09h
     mov dx, offset msg_step6
@@ -375,7 +375,7 @@ numara_biti:
     jnc nu_e_unu
     inc dl              ; Daca CF=1, incrementam contorul
 nu_e_unu:
-    ; --- MODIFICARE AICI: Nu folosim LOOP pentru a proteja CH ---
+    ; Nu folosim LOOP pentru a proteja CH ---
     dec cl              ; Scadem manual CL
     jnz numara_biti     ; Daca CL nu e 0, sare inapoi
     ; ------------------------------------------------------------
@@ -470,7 +470,7 @@ nu_exista_max:
     mov dx, offset msg_none
     int 21h
 ; ============================
-; PASUL 7 – CALCUL SUMA BITI SI ROTIRE (CORECTAT)
+; CALCUL SUMA BITI SI ROTIRE
 ; ============================
 pasul_7_start:
     mov ah, 09h
@@ -520,10 +520,10 @@ scrie_bit:
     mov ah, 02h
     int 21h
     
-    ; --- MODIFICARE CRITICA AICI ---
+    
     dec cl              ; Scadem doar CL (nu atingem CH)
     jnz print_bin       ; Daca CL != 0, continuam
-    ; -------------------------------
+
 
     ; Sageata separator
     mov ah, 09h
