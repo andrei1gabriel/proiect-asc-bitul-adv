@@ -405,7 +405,7 @@ afisare_max:
     ; 1. Afisare Valoare Octet (HEX)
     mov bl, max_oct
     
-    ; High Nibble
+    ; Octetul high
     mov dl, bl
     shr dl, 1
     shr dl, 1
@@ -419,7 +419,7 @@ pm_d1: add dl, 30h
 pm_p1: mov ah, 02h
     int 21h
     
-    ; Low Nibble
+    ; Octetul low
     mov dl, bl
     and dl, 0Fh
     cmp dl, 9
