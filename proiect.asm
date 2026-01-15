@@ -53,35 +53,36 @@ reincearca:
 
     ; Initializare parsare
     mov lungime, 0
-    lea si, buf_text         
-    lea di, sir              
+    lea si, buf_text     ; SI pointează la începutul textului     
+    lea di, sir          ; DI pointează la începutul vectorului    
     
-    xor cx, cx               
-    mov cl, buf_len          
-    cmp cx, 0
-    je reincearca            
+    xor cx, cx           ;   CX = 0           
+    mov cl, buf_len      ;  CX = numărul de caractere citite       
+    cmp cx, 0            ;  Verifică dacă s-a introdus ceva
+    je reincearca        ; ; Dacă nu, cere din nou input
+   
 
 parsare:
-    cmp cx, 0
-    jg continua_parsare
-    jmp validare_finala      
+    cmp cx, 0           ; Mai sunt caractere?
+    jg continua_parsare  ; Dacă da, continuă
+    jmp validare_finala    ; Dacă nu, verifică rezultatul     
 
 continua_parsare:
     ; Sarim peste spatii
-    mov al, [si]
-    cmp al, ' '
-    jne incepe_octet
-    inc si
+    mov al, [si]      ; Citește caracterul curent   
+    cmp al, ' '        ; Este spațiu?
+    jne incepe_octet    ; Dacă nu, începe citirea unui octet
+    inc si             ; Sare peste spațiu
     dec cx
     jmp parsare
 
 incepe_octet:
-    cmp cx, 2
+    cmp cx, 2           ; Avem cel puțin 2 caractere?
     jae ok_2car
-    jmp eroare_hex
+    jmp eroare_hex        ; Altfel eroare
 
 ok_2car:
-    ; === NIBBLE 1 (High) ===
+    ; === Octetul 1 (High) ===
     mov al, [si]
     cmp al, '0'
     jb  n1_err_tr
@@ -98,21 +99,21 @@ ok_2car:
     jmp n1_err_tr            
 
 n1_cifra:
-    sub al, '0'
+    sub al, '0'      ; '0'–'9' → 0–9
     jmp n1_gata
 n1_lit_mare:
     sub al, 'A'
-    add al, 10
+    add al, 10        ; 'A'–'F' → 10–15
     jmp n1_gata
 n1_lit_mica:
     sub al, 'a'
     add al, 10
 n1_gata:
-    mov ah, al               
+    mov ah, al          ; AH = nibble mare          
     inc si                   
     dec cx
 
-    ; === NIBBLE 2 (Low) ===
+    ; ===Octetul 2 (Low) ===
     mov al, [si]
     cmp al, '0'
     jb  n2_err_tr
@@ -143,19 +144,19 @@ n2_gata:
     shl ah, 1
     shl ah, 1
     shl ah, 1
-    add al, ah               
+    add al, ah       ; AL = octet complet        
 
-    mov [di], al             
-    inc di                   
+    mov [di], al      ; Salvează octetul în vector        
+    inc di             ; Treci la următoarea poziție         
     
-    mov bl, lungime
-    inc bl
-    mov lungime, bl
+    mov bl, lungime     ; BL = număr octeți
+    inc bl                   ; Crește contorul
+    mov lungime, bl        ; Depășește 16?
     
     cmp bl, 16
     ja eroare_len            
 
-    inc si                   
+    inc si           ; Treci mai departe în text           
     dec cx
     jmp parsare
 
@@ -165,9 +166,9 @@ n2_err_tr: jmp eroare_hex
 ; === VALIDARE SI ERORI ===
 validare_finala:
     mov al, lungime
-    cmp al, 8
+    cmp al, 8         ;  Minim 8 octeți
     jb eroare_len            
-    cmp al, 16
+    cmp al, 16           ; Maxim 16 octeți
     ja eroare_len            
     
     mov dx, offset msg_ok
