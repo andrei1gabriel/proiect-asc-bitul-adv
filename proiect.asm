@@ -194,58 +194,63 @@ eroare_hex:
 pasul_4:
     mov C, 0                 
 
-    ; 1. Biti 0-3
-    mov al, sir[0]           
-    and al, 0Fh              
-    xor bx, bx               
-    mov bl, lungime
-    dec bl                   
-    lea si, sir
-    add si, bx               
-    mov bl, [si]             
+    ; 1. Biti 0-3 din C 
+	;facem xor intre octetul superior si cel inferior
+    mov al, sir[0]     ;al = primul element din sir    
+    and al, 0Fh        ;pastram bitii 0-3 ai octetului inferior      
+    xor bx, bx          ; BX = 0   
+    mov bl, lungime  ; BL = lungimea sirului
+    dec bl              ; BL = lungime - 1 (index ultim element)
+    lea si, sir          ; SI = adresa de inceput a sirului
+    add si, bx       ; SI = adresa ultimului element         
+    mov bl, [si]    ; BL = ultimul element din sir          
+    shr bl, 1        ; Deplasam la dreapta octetul superior         
+    shr bl, 1        ; (bitii 4–7 ajung in 0–3)
+    shr bl, 1        
     shr bl, 1                
-    shr bl, 1
-    shr bl, 1
-    shr bl, 1                
-    xor al, bl               
+    xor al, bl        ;XOR intre cei doi octeti        
     and al, 0Fh              
-    mov word ptr C, ax       
+    mov word ptr C, ax    ; Punem rezultatul in bitii 0–3 ai lui C
+   
 
     ; 2. Biti 4-7
-    xor bx, bx               
+	; OR intre bitii 2–5 (dupa shift) ai tuturor elementelor
+    xor bx, bx      ; BL = 0 (acumulator pentru OR)         
     xor cx, cx
-    mov cl, lungime
-    lea si, sir
+    mov cl, lungime ; CX = lungime sir
+
+    lea si, sir ;  ; SI = inceputul sirului
+
 pas4_or_loop:
-    mov al, [si]
-    shr al, 1
+    mov al, [si] ; AL = element curent 
+    shr al, 1 ; Deplasam la dreapta 2 pozitii
     shr al, 1                
-    and al, 0Fh              
-    or bl, al                
-    inc si
-    loop pas4_or_loop
-    shl bl, 1                
+    and al, 0Fh   ; Pastram 4 biti             
+    or bl, al    ; OR cu rezultatele anterioare            
+    inc si         ; Trecem la elementul urmator
+    loop pas4_or_loop    ; Repetam pentru toate elementele
+    shl bl, 1        ; Mutam rezultatul in pozitia 4–7        
     shl bl, 1
     shl bl, 1
     shl bl, 1
-    or byte ptr C, bl        
+    or byte ptr C, bl   ; Inseram bitii 4–7 in C     
 
     ; 3. Biti 8-15
-    xor ax, ax               
+    xor ax, ax             ; AX = 0 (suma)  
     xor cx, cx
-    mov cl, lungime
+    mov cl, lungime        ; CX = lungime sir
     lea si, sir
 pas4_sum_loop:
     xor bx, bx
-    mov bl, [si]
-    add ax, bx
-    inc si
+    mov bl, [si]           ; BL = element curent
+    add ax, bx             ; Adunam la suma
+    inc si                  ; Repetam
     loop pas4_sum_loop
-    mov byte ptr [C+1], al
+    mov byte ptr [C+1], al  ; Byte-ul superior al lui C = suma (AL)
 
     ; --- AFISARE C (WORD) ---
     mov ah, 09h
-    mov dx, offset msg_c
+    mov dx, offset msg_c        ; Afisam mesajul "C = "
     int 21h
 
     mov bx, C        ; Luam valoarea lui C
@@ -260,13 +265,13 @@ print_c_loop:
     and dl, 0Fh      ; Pastram ultimii 4 biti
     
     cmp dl, 9
-    jbe pc_digit
+    jbe pc_digit     ; Daca e cifra 0–9
     add dl, 37h      ; 'A'-10
     jmp pc_print
 pc_digit:
     add dl, 30h      ; '0'
 pc_print:
-    mov ah, 02h
+    mov ah, 02h      ;  Afisam caracterul
     int 21h
     loop print_c_loop
 
@@ -281,21 +286,21 @@ pc_print:
     mov cl, lungime
     dec cl                   ; N-1
 sort_ext:
-    lea si, sir
+    lea si, sir              ;; SI = inceput sir
     mov dl, cl               ; DL contor intern
 sort_int:
-    mov al, [si]
-    mov bl, [si+1]
+    mov al, [si]		; AL = element curent
+    mov bl, [si+1]       ; BL = element urmator
     cmp al, bl
     jae no_swap              ; Descrescator
 
     ; Swap
-    mov [si], bl
-    mov [si+1], al
+    mov [si], bl             
+    mov [si+1], al           
 no_swap:
-    inc si
-    dec dl
-    jnz sort_int
+    inc si          ; Avansam in sir
+    dec dl             ; Continuam bucla interioara
+    jnz sort_int     ;  Continuam bucla exterioara
     
     dec cl                   
     jnz sort_ext
@@ -303,17 +308,17 @@ no_swap:
 pasul_5_afisare:
     ; --- AFISARE SIR SORTAT ---
     mov ah, 09h
-    mov dx, offset msg_sort
+    mov dx, offset msg_sort   ; Mesaj "Sir sortat:"
     int 21h
 
     lea si, sir
     xor cx, cx
-    mov cl, lungime
+    mov cl, lungime            ;CX = lungime sir
     
 print_sir_loop:
-    mov bl, [si]
+     mov bl, [si]                ; BL = element curent
     
-    ; High Nibble
+    ;Octetul high
     mov dl, bl
     shr dl, 1
     shr dl, 1
@@ -328,7 +333,7 @@ ps_p1:
     mov ah, 02h
     int 21h
     
-    ; Low Nibble
+   ;Octetul low
     mov dl, bl
     and dl, 0Fh
     cmp dl, 9
@@ -344,7 +349,7 @@ ps_p2:
     mov dl, ' '
     int 21h
     
-    inc si
+    inc si              ; Urmatorul element
     loop print_sir_loop
 ; ============================
 ;  MAX BITI DE 1
